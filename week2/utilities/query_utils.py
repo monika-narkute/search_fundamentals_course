@@ -158,19 +158,31 @@ def create_query(user_query, filters, sort="_score", sortDir="desc", size=10, in
 ##########
 # Give a user query from the UI and the query object we've built so far, adding in spelling suggestions
 def add_spelling_suggestions(query_obj, user_query):
-    #### W2, L2, S1
-    print("TODO: IMPLEMENT ME")
-    #query_obj["suggest"] = {
-    #    "text": user_query,
-    #    "phrase_suggest": {
-
-    #    },
-    #    "term_suggest": {
-
-    #    }
-    #}
-
-
+    query_obj["suggest"] = {
+        "text": user_query,
+        "phrase_suggest": {
+            "phrase": {
+                "field": "suggest.trigram",
+                "direct_generator": [{
+                    "field": "suggest.trigram",
+                    "min_word_length": 2,
+                    "suggest_mode": "popular"
+                }],
+                    "highlight": {
+                      "pre_tag": "<em>",
+                      "post_tag": "</em>"
+                    }
+            }
+        },
+        "term_suggest": {
+            "term": {
+                "field": "suggest.text",
+                "min_word_length": 3,
+                "suggest_mode": "popular"
+            }
+        }
+    }
+    
 # Given the user query from the UI, the query object we've built so far and a Pandas data GroupBy data frame,
 # construct and add a query that consists of the ids from the items that were clicked on by users for that query
 # priors_gb (loaded in __init__.py) is grouped on query and has a Series of SKUs/doc ids for every document that was cliecked on for this query
